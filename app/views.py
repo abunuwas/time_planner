@@ -45,6 +45,17 @@ def method_not_allowed(_):
     return make_response(jsonify({'error': 'Method not allowed'}), 405)
 
 
+def get_uri(entity, data):
+    result = {}
+    query_data = {entity + '_id': data['id'], '_external': True}
+    for field in data:
+        if field == 'id':
+            result['uri'] = url_for('get_' + entity, **query_data)
+        else:
+            result[field] = data[field]
+    return result
+
+
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
 def index():
@@ -53,7 +64,7 @@ def index():
 
 @app.route('/tasks', methods=['GET'])
 def get_tasks():
-    return jsonify(tasks)
+    return jsonify([get_uri('task', task) for task in tasks])
 
 
 @app.route('/task/<int:task_id>', methods=['GET'])
